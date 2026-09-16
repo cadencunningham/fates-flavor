@@ -1,8 +1,12 @@
 # Plan: Fates Flavor — recipe picker (P0–P2)
 **Created:** 2026-09-14
-**Status:** draft
+**Status:** in-progress
+**Started:** 2026-09-14 20:57
+**Current Phase:** 1 complete (batch review PASS) — awaiting owner sign-off before Phase 2
+**Workspace:** branch `feature/fates-flavor` (feature-branch mode)
 **Complexity:** complex
 **Review cadence:** 2
+**Phase sign-off:** required — the build halts after each phase's gate completes and does not open the next phase until the owner reviews the code and approves. Pivots are logged in `docs/work_summaries.md`.
 ---
 ## Context
 **Problem:** There is no site where a customer can browse recipes, pick one manually or let the site choose at random, narrow the pool with filters, and turn several chosen recipes into one grocery list.
@@ -22,7 +26,7 @@
 ## Constraints
 - React + TypeScript (strict) + Vite, static build, hosted on GitHub Pages (repo `cadencunningham/fates-flavor`, public) at base path `/fates-flavor/`; deployed via GitHub Actions.
 - HashRouter for routing (no server fallback on Pages).
-- Styling: Tailwind v4 on semantic CSS-variable design tokens; shadcn/ui components added only when a phase needs one. Components use semantic tokens only — never raw palette colors or hex — so future theming is a token swap.
+- Styling: Tailwind v4 on semantic CSS vars; shadcn/ui components added only when a phase needs one. Components use semantic vars only — never raw palette colors or hex — so future theming is a value swap.
 - Data lives in static JSON assets, read only through a `RecipeRepository` interface so an API/DB can replace it without UI changes.
 - Normalized model: recipes, tags, ingredients in separate files; recipe lines reference ingredients by ID. Model includes P1/P2 fields from the start (optional where not yet populated).
 - Filter criteria persist in localStorage and never appear in the URL.
@@ -48,17 +52,17 @@
 **Skills:** cc-quality-practices
 **Gate:** Standard
 
-**Goal:** Stand up a strict-TS React + Vite app shell with test/lint tooling, Tailwind v4 semantic tokens, and a GitHub Actions workflow that deploys to Pages on green `main`.
+**Goal:** Stand up a strict-TS React + Vite app shell with test/lint tooling, Tailwind v4 semantic CSS vars, and a GitHub Actions workflow that deploys to Pages on green `main`.
 
 **Scope:**
-- IN: Vite/React/TS scaffold, Vitest + React Testing Library (jsdom), ESLint, HashRouter shell with placeholder home + not-found routes, Tailwind v4 + `tokens.css`, shadcn init, raw-color guard script, CI/deploy workflow, README dev commands.
+- IN: Vite/React/TS scaffold, Vitest + React Testing Library (jsdom), ESLint, HashRouter shell with placeholder home + not-found routes, Tailwind v4 + `vars.css`, shadcn init, raw-color guard script, CI/deploy workflow, README dev commands.
 - OUT: any recipe data, domain types, feature UI, dark theme values.
 
-**Constraints:** Vite `base: '/fates-flavor/'`. Tokens are semantic names only (surface, surface-raised, text, text-muted, accent, accent-contrast, border, radius, spacing scale); light values only.
+**Constraints:** Vite `base: '/fates-flavor/'`. CSS vars are semantic names only (surface, surface-raised, text, text-muted, accent, accent-contrast, border, radius, spacing scale); light values only.
 **Edge cases:** deep link `#/does-not-exist` renders not-found; deploy job must not run on PRs or on red checks.
 **Depends on:** none | **Unlocks:** Phase 2
 **File scope:** `package.json, package-lock.json, vite.config.ts, tsconfig*.json, index.html, eslint.config.*, components.json, .nvmrc, .github/workflows/**, scripts/**, src/main.tsx, src/app/**, src/styles/**, src/lib/**, src/test/**, README.md`
-**Produces:** runnable app with scripts `dev | build | test | lint | typecheck | check:tokens`; directory layout `src/app` (composition root, routes), `src/domain` (pure TS, no React/DOM), `src/data` (repository + storage adapters), `src/features/<feature>`, `src/components/ui` (shadcn), `src/styles/tokens.css`, `public/data`.
+**Produces:** runnable app with scripts `dev | build | test | lint | typecheck | check:vars`; directory layout `src/app` (composition root, routes), `src/domain` (pure TS, no React/DOM), `src/data` (repository + storage adapters), `src/features/<feature>`, `src/components/ui` (shadcn), `src/styles/vars.css`, `public/data`.
 **Rollback:** redeploy the previous green commit (revert + push re-runs the workflow); disable Pages in repo settings as last resort.
 
 **Approach notes:** User confirmed GitHub Actions (public repo → free). Repo Settings → Pages → Source must be set to "GitHub Actions" (one-time manual step by the user).
@@ -66,9 +70,9 @@
 **Done when:**
 - [ ] DW-1.1: `npm run build` emits `dist/` whose asset URLs are prefixed `/fates-flavor/`; `npm run dev` serves the shell.
 - [ ] DW-1.2: `npm test`, `npm run lint`, `npm run typecheck` pass; a smoke test renders the app shell and the not-found route.
-- [ ] DW-1.3: Tailwind v4 reads `src/styles/tokens.css` via `@theme`; the shell uses only semantic token utilities.
-- [ ] DW-1.4: `npm run check:tokens` fails on raw palette utilities (e.g. `bg-red-500`) or hex colors in `src/features/**` and `src/components/**`, and passes on the current tree (verified by a fixture test).
-- [ ] DW-1.5: `.github/workflows/deploy.yml` runs lint, typecheck, check:tokens, test, build on push and PR; the deploy job runs only on `main` after all pass.
+- [ ] DW-1.3: Tailwind v4 reads `src/styles/vars.css` via `@theme`; the shell uses only semantic var utilities.
+- [ ] DW-1.4: `npm run check:vars` fails on raw palette utilities (e.g. `bg-red-500`) or hex colors in `src/features/**` and `src/components/**`, and passes on the current tree (verified by a fixture test).
+- [ ] DW-1.5: `.github/workflows/deploy.yml` runs lint, typecheck, check:vars, test, build on push and PR; the deploy job runs only on `main` after all pass.
 - [ ] DW-1.6: Shell is reachable at `https://cadencunningham.github.io/fates-flavor/` (manual).
 
 **Difficulty:** LOW
@@ -155,7 +159,7 @@ useFilteredRecipes(): { status: 'loading' | 'error' | 'ready'; recipes: Recipe[]
 - [ ] DW-3.4: Random pick selects only from the filtered set; "pick again" never repeats the previous pick when ≥2 candidates; disabled with a message at 0 candidates.
 - [ ] DW-3.5: Clicking a card (or the random result) opens `#/recipe/:id` showing title, description, tags; `RecipeCard` renders its `actions` slot when provided.
 - [ ] DW-3.6: Repository failure shows an error message with a retry control; changing filters updates browse and random without reload.
-- [ ] DW-3.7: `npm run check:tokens` passes over the new features.
+- [ ] DW-3.7: `npm run check:vars` passes over the new features.
 
 **Difficulty:** MEDIUM
 **Uncertainty:** None
@@ -171,7 +175,7 @@ useFilteredRecipes(): { status: 'loading' | 'error' | 'ready'; recipes: Recipe[]
 - IN: detail view sections (image, description, tags, prep/cook/total time, servings, ingredient names + notes, numbered steps), not-found view, ingredient exclusion picker, P1 seed data + images.
 - OUT: formatted quantities and scaling (Phase 6), selection controls (Phase 6).
 
-**Edge cases:** unknown recipe id; recipe missing any optional field (section hidden, never "undefined"/"NaN"); image fails to load (token-styled placeholder); ingredient exclusion that empties the list; ingredient search with no match.
+**Edge cases:** unknown recipe id; recipe missing any optional field (section hidden, never "undefined"/"NaN"); image fails to load (placeholder styled from semantic vars); ingredient exclusion that empties the list; ingredient search with no match.
 **Depends on:** Phase 3 | **Unlocks:** Phase 6
 **File scope:** `src/features/recipe-detail/**, src/features/filters/**, src/components/ui/**, public/data/**, public/images/**`
 **Produces:** complete `#/recipe/:id` detail view built from extension points Phase 6 fills without restructuring; seed data where every recipe has ingredients, steps, times, servings.
@@ -281,9 +285,9 @@ interface PreferencesStore { load(): { system: MeasurementSystem }; save(p: { sy
 **Unit (Vitest)**
 - [ ] DW-1.1 build-output test (CI step after `npm run build`): `dist/index.html` asset URLs start with `/fates-flavor/`
 - [ ] DW-1.2 app shell + not-found smoke render
-- [ ] DW-1.3 `tokens.css` declares every semantic token inside `@theme`; `check:tokens` passes on the shell
-- [ ] DW-1.4 `check:tokens` fixture: fails on `bg-red-500` and `#ff0000`, passes on semantic utilities
-- [ ] DW-3.7 `check:tokens` passes over `src/features/**` (CI step)
+- [ ] DW-1.3 `vars.css` declares every semantic var inside `@theme`; `check:vars` passes on the shell
+- [ ] DW-1.4 `check:vars` fixture: fails on `bg-red-500` and `#ff0000`, passes on semantic utilities
+- [ ] DW-3.7 `check:vars` passes over `src/features/**` (CI step)
 - [ ] DW-2.1 / DW-5.6 import-boundary tests for `src/domain/**`
 - [ ] DW-2.5 import-boundary test: `StaticJsonRecipeRepository` imported only under `src/app/**`; `src/features/**` never imports `src/data/repository` implementations
 - [ ] DW-2.2 schema: valid fixture passes; dirty — duplicate id, dangling tagId, dangling ingredientId, id `"AB!"`, id length 3 and 13 (boundary; 4 and 12 pass), `amount: 0`, `amount: -1`, unknown unit, quantity without servings, missing title, `tagIds` not an array
@@ -338,7 +342,7 @@ interface PreferencesStore { load(): { system: MeasurementSystem }; save(p: { sy
 |---|---|---|---|
 | React + TS + Vite | Vanilla TS, Svelte | Shared filter state across views; future animated view | 1 |
 | GitHub Actions deploy | Manual `gh-pages` push | Free on public repo; automatic, gated on green checks | 1 |
-| Tailwind v4 + semantic tokens + shadcn on demand | CSS Modules, CSS-in-JS, vanilla-extract | Tokens as CSS vars make theming a swap; accessible primitives for filters/dialogs | 1 |
+| Tailwind v4 + semantic CSS vars + shadcn on demand | CSS Modules, CSS-in-JS, vanilla-extract | Semantic vars make theming a value swap; accessible primitives for filters/dialogs | 1 |
 | HashRouter | BrowserRouter + 404.html | No Pages fallback hack; hosting not settled | 1 |
 | Normalized JSON behind `RecipeRepository` | Embedded strings, compiled per-recipe files | Exact ID-based merge/exclude; DB-shaped | 2 |
 | Runtime fetch of `public/data` JSON | Bundle-time JSON import | Mirrors future API; async repository contract from day one | 2 |
@@ -353,11 +357,22 @@ interface PreferencesStore { load(): { system: MeasurementSystem }; save(p: { sy
 - **Seam discipline:** `src/domain/**` must stay free of React/DOM so it can be reused server-side if a backend arrives.
 - **HashRouter + query gotcha:** `?sel=` sits inside the hash; plain `<Link to="/recipe/x">` drops it. Phase 6 must route every navigation through a sel-preserving helper.
 - **Images:** use owner-taken or clearly licensed images; commit optimized files under `public/images/`, referenced relative to `BASE_URL`.
-- **Theming readiness:** dark/light later = add dark token values under `[data-theme="dark"]`; no component changes if the token constraint holds.
+- **Theming readiness:** dark/light later = add dark var values under `[data-theme="dark"]`; no component changes if the semantic-var constraint holds.
 - **Fun random view:** replace `RandomPick` implementation; `pickRandom` and `useFilteredRecipes` stay.
 - **Future DB:** implement `RecipeRepository` against an API; the schema doubles as the API response validator.
 - `docs/code-standards.md` was not generated (empty repo); regenerate after Phase 1 to capture the conventions it establishes.
 
 ---
 ## Execution Log
-_To be filled during /code-foundations:build_
+### Phase 1: Scaffold & deploy pipeline (Gate: Standard)
+- [x] BUILD: Discovery + design + implementation (stub → implement → validate) complete
+- [x] REVIEW: DEFERRED — batch pending (tests green at commit)
+- [x] Committed
+Commit: (see git log, `feat(scaffold)`)
+Summary: Vite 6.4 + React 19.3 + react-router-dom 7 + TS 5.9 strict app (deps pinned for local Node 20.11.1, `.npmrc` legacy-peer-deps) with HashRouter shell (`src/app/App.tsx`, `routes/Home|NotFound`), Vitest + RTL (jsdom 26) tests under `src/test/`, Tailwind v4 semantic CSS vars in `src/styles/vars.css`, hand-authored shadcn `components.json` (no components yet — first `shadcn add` must map onto project var names), `check:vars` + `verify:build` scripts, and `.github/workflows/deploy.yml` (checks on push/PR, deploy only on green `main`); DW-1.6 live-URL check pending push + Pages source setting.
+- 2026-09-14: Batch review (phase 1) attempt 1 — FAIL. DW-1.2: no test renders the real `<App/>` shell (tests render only `AppRoutes`). Note: Tailwind scans test fixtures, so `.bg-red-500` leaks into the production CSS bundle. Build paused by user before fix-forward; resume with a Phase 1 fix dispatch, then re-run the batch review.
+- 2026-09-15: Fix-forward dispatch (attempt 1) — DONE. DW-1.2 gap closed with `test_DW_1_2_renders_shell_chrome_around_routed_content` rendering `<App/>` under `MemoryRouter` (header assertion scoped via `getByRole("banner")` — brand text and Home `<h1>` are both "Fate's Flavor"). Bundle-leak note also fixed: three `@source not` exclusions (test/scripts/docs) in `src/styles/index.css`; new `src/test/build-css-vars.test.ts` builds and asserts the compiled CSS has no raw palette utility. CSS 9.77 kB → 6.27 kB. Suite 13 → 15 green.
+- 2026-09-15: Terminology rename (owner decision) — "tokens" → "vars" across files, scripts, and prose: `src/styles/vars.css`, `scripts/check-vars.mjs`, `npm run check:vars`, `src/test/{vars,check-vars,build-css-vars}.test.ts`, plus `package.json`, `deploy.yml`, `README.md`, and this plan's DW-1.3/1.4/1.5, DW-3.7 and Test Plan lines. CSS custom-property names were already semantic and unchanged. Only surviving "token" in the tree is GitHub's `id-token: write` OIDC permission.
+- 2026-09-15: Process change (owner decision) — per-phase sign-off gate. The build stops after each phase's gate completes and waits for an owner code review before the next phase opens. Pivots are recorded in `docs/work_summaries.md`.
+- 2026-09-15: Covered by batch review (phases 1–1), attempt 2 — PASS. All 6 DW items carry execution evidence (DW-1.6 remains manual, pending push + Pages source setting). Reviewer independently planted a `bg-red-500` file under `src/components/ui/` to prove `check:vars` exits 1, then removed it. 7 non-blocking notes; README `verify:build` gap fixed, two forward-looking risks logged in `docs/work_summaries.md` (vacuous current-tree fixture test; guard misses Tailwind keyword colors like `bg-white`).
+- 2026-09-15: **AWAITING OWNER SIGN-OFF** — Phase 2 does not open until the owner reviews Phase 1 and approves.

@@ -1,0 +1,32 @@
+/**
+ * Semantic CSS vars for Fate's Flavor.
+ *
+ * Rules (see docs/plans/2026-09-14-fates-flavor.md, Phase 1 constraints):
+ *  - Names are semantic (surface, text, accent, ...), never raw palette names.
+ *  - Light values only in this phase; dark values arrive later under
+ *    [data-theme="dark"] without any component change (Notes: "Theming
+ *    readiness").
+ *  - Components must consume these via Tailwind utilities generated from
+ *    this @theme block (bg-surface, text-text, rounded-[var(--radius)],
+ *    p-md, ...) — never raw hex or Tailwind palette utilities.
+ */
+@theme {
+  /* Color */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f6f4f1;
+  --color-text: #1f1b16;
+  --color-text-muted: #6b6459;
+  --color-accent: #b5432c;
+  --color-accent-contrast: #ffffff;
+  --color-border: #e4dfd7;
+
+  /* Shape */
+  --radius: 0.5rem;
+
+  /* Spacing scale (named, not Tailwind's bare numeric scale) */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
