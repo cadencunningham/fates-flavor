@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "./vars.css";
+
+/*
+ * Test files hold string fixtures for the raw-utility guard (e.g. the
+ * literal "bg-red-500" in src/test/check-vars.test.ts) that are not real
+ * markup. Tailwind's default content scan is unscoped and would otherwise
+ * pick these up and emit dead utility rules into the production bundle.
+ */
+@source not "../test";
+@source not "../../scripts";
+@source not "../../docs";
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
